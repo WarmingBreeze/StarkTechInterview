@@ -1,5 +1,7 @@
-export default function Home() {
+import SearchBar from "@/components/SearchBar";
+
+export default function App() {
     return (
-        <h1>Hello World!</h1>
+        <SearchBar />
     );
 }
