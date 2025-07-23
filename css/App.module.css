@@ -1,0 +1,20 @@
+.pos_header {
+    position: absolute;
+    top: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.pos_chart {
+    position: absolute;
+    top: 138px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.pos_datatable {
+    position: absolute;
+    top: 628px;
+    left: 50%;
+    transform: translateX(-50%);    
+}
