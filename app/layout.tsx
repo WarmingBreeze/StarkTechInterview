@@ -1,5 +1,5 @@
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
-import MuiThemeProvider from "@/components/MuiThemeProvider";
+import AppProvider from "@/components/AppProvider";
 
 export const metadata = {
   title: "每月營收",
@@ -14,9 +14,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AppRouterCacheProvider>
-          <MuiThemeProvider>
+          <AppProvider>
             {children}
-          </MuiThemeProvider>
+          </AppProvider>
         </AppRouterCacheProvider>
       </body>
     </html>

@@ -1,8 +1,9 @@
 "use client";
 
-import { Box, Button, Stack } from "@mui/material";
+import { Box, Button, MenuItem, Select, Stack } from "@mui/material";
 import HighchartsReact from "highcharts-react-official";
 import Highcharts, { Options } from "highcharts";
+import { useState } from "react";
 
 const options: Options = {
   title: {
@@ -42,6 +43,10 @@ const options: Options = {
 };
 
 export default function Chart() {
+  const [range, setRange] = useState<"3" | "5" | "8" | "custom">("5");
+  function handleChange () {
+
+  }
   return (
     <Box
       sx={{
@@ -53,7 +58,16 @@ export default function Chart() {
     >
       <Stack direction="row" justifyContent="space-between">
         <Button variant="contained">每月營收</Button>
-        <Button variant="contained">近五年</Button>
+        <Select
+          size="small"
+          value={range}
+          onChange={handleChange}
+        >
+          <MenuItem value="3">近 3 年</MenuItem>
+          <MenuItem value="5">近 5 年</MenuItem>
+          <MenuItem value="8">近 8 年</MenuItem>
+          <MenuItem value="custom">自訂</MenuItem>
+        </Select>
       </Stack>
       <HighchartsReact highcharts={Highcharts} options={options} />
     </Box>
