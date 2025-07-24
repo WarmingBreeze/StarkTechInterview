@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Button, MenuItem, Select, Stack } from "@mui/material";
+import { Box, Button, MenuItem, Select, SelectChangeEvent, Stack } from "@mui/material";
 import HighchartsReact from "highcharts-react-official";
 import Highcharts, { Options } from "highcharts";
 import { useState } from "react";
@@ -42,10 +42,12 @@ const options: Options = {
   ],
 };
 
+
+
 export default function Chart() {
   const [range, setRange] = useState<"3" | "5" | "8" | "custom">("5");
-  function handleChange () {
-
+  function handleChange (e: SelectChangeEvent) {
+    setRange(e.target.value as "3" | "5" | "8" | "custom");
   }
   return (
     <Box

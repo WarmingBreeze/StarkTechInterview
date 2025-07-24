@@ -6,7 +6,12 @@ import {
   QueryClientProvider,
   useQuery,
 } from "@tanstack/react-query";
-import { createContext } from "react";
+import { createContext, useState } from "react";
+
+interface ParamsType {
+  startYear: string;
+  endYear: string;
+}
 
 const queryClient = new QueryClient();
 
@@ -48,13 +53,31 @@ export default function AppProvider({
 }
 
 function DataProvider({ children }: { children: React.ReactNode }) {
-  const fetchData = async () => {};
+  const [params, setParams] = useState<ParamsType>(
+    {
+      startYear: "2020",
+      endYear: "2022"
+    }
+  );
+  const fetchData = async () => {
+    const response = await fetch(
+      `/api?dataset=TaiwanStockMonthRevenue&data_id=2330&start_date=${params.startYear}-11-01&end_date=${params.endYear}-11-30`
+    );
 
-  const { data= {} } = useQuery({
-    queryKey: ["key"],
+    if (!response.ok) throw new Error("Failed to fetch data");
+
+    return response.json();
+  };
+
+  const { data = { msg: "", status: "", data: [] }, isLoading } = useQuery({
+    queryKey: ["data"],
     queryFn: fetchData,
     enabled: true,
   });
+
+  console.log("data: ", JSON.stringify(data));
+
+  if (isLoading) return <p>Loading...</p>;
 
   return <DataContext.Provider value={data}>{children}</DataContext.Provider>;
 }

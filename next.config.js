@@ -2,9 +2,9 @@ module.exports = {
   async rewrites() {
     return [
       {
-        source: "/api/:path*",
+        source: "/api",
         destination:
-          "https://www.digitimes.com.tw/webservice/Intelligence/datacharts/:path*", // 目標 API URL
+          "https://api.finmindtrade.com/api/v4/data", // 目標 API URL
       },
     ];
   },
