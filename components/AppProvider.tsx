@@ -6,11 +6,42 @@ import {
   QueryClientProvider,
   useQuery,
 } from "@tanstack/react-query";
-import { createContext, useState } from "react";
+import { createContext, SetStateAction, useState } from "react";
 
-interface ParamsType {
+export interface ParamsType {
+  stockID: string;
   startYear: string;
   endYear: string;
+}
+
+export interface ChartDataType {
+  date: string;
+  stock_id: string;
+  country: string;
+  revenue: number;
+  revenue_month: number;
+  revenue_year: number;
+}
+
+export interface StockInfoType {
+  industry_category: string;
+  stock_id: string;
+  stock_name: string;
+  type: string;
+  date: string;
+}
+
+interface ResponseType {
+  msg: string;
+  status: string;
+  data: ChartDataType[] | StockInfoType[];
+}
+
+interface DataContextType {
+  stockList: ResponseType;
+  chartData: ResponseType;
+  params: ParamsType;
+  setParams: React.Dispatch<SetStateAction<ParamsType>>;
 }
 
 const queryClient = new QueryClient();
@@ -33,7 +64,24 @@ const theme = createTheme({
   },
 });
 
-const DataContext = createContext<any>({});
+export const DataContext = createContext<DataContextType>({
+  stockList: {
+    msg: "",
+    status: "",
+    data: [],
+  },
+  chartData: {
+    msg: "",
+    status: "",
+    data: [],
+  },
+  params: {
+    stockID: "",
+    startYear: "",
+    endYear: ""
+  },
+  setParams: () => {},
+});
 
 export default function AppProvider({
   children,
@@ -53,31 +101,53 @@ export default function AppProvider({
 }
 
 function DataProvider({ children }: { children: React.ReactNode }) {
-  const [params, setParams] = useState<ParamsType>(
-    {
-      startYear: "2020",
-      endYear: "2022"
-    }
-  );
-  const fetchData = async () => {
+  const [params, setParams] = useState<ParamsType>(() => {
+    const currentYear = new Date().getFullYear();
+    return (
+      {
+        stockID: "2330",
+        startYear: (currentYear - 5).toString(),
+        endYear: currentYear.toString(),
+      }
+    );
+  });
+  const fetchData = (dataset: string) => async () => {
     const response = await fetch(
-      `/api?dataset=TaiwanStockMonthRevenue&data_id=2330&start_date=${params.startYear}-11-01&end_date=${params.endYear}-11-30`
+      `/api?dataset=${dataset}&data_id=${params.stockID}&start_date=${String(parseInt(params.startYear, 10) - 1)}-02-01&end_date=${String(parseInt(params.endYear, 10) + 1)}-01-01`
     );
 
+    //
     if (!response.ok) throw new Error("Failed to fetch data");
 
     return response.json();
   };
 
-  const { data = { msg: "", status: "", data: [] }, isLoading } = useQuery({
-    queryKey: ["data"],
-    queryFn: fetchData,
-    enabled: true,
-  });
+  const { data: stockList = { msg: "", status: "", data: [] } } =
+    useQuery<ResponseType>({
+      queryKey: ["list"],
+      queryFn: fetchData("TaiwanStockInfo"),
+      enabled: true,
+    });
 
-  console.log("data: ", JSON.stringify(data));
+  const { data: chartData = { msg: "", status: "", data: [] } } =
+    useQuery<ResponseType>({
+      queryKey: ["data", params.startYear, params.endYear],
+      queryFn: fetchData("TaiwanStockMonthRevenue"),
+      enabled: !!params.startYear && !!params.endYear,
+    });
 
-  if (isLoading) return <p>Loading...</p>;
+  // console.log("data: ", JSON.stringify(chartData));
 
-  return <DataContext.Provider value={data}>{children}</DataContext.Provider>;
+  return (
+    <DataContext.Provider
+      value={{
+        stockList: stockList,
+        chartData: chartData,
+        params: params,
+        setParams: setParams,
+      }}
+    >
+      {children}
+    </DataContext.Provider>
+  );
 }
