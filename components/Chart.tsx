@@ -3,11 +3,14 @@
 import {
   Box,
   Button,
+  ButtonProps,
   Divider,
   MenuItem,
+  Popover,
   Select,
   SelectChangeEvent,
   Stack,
+  styled,
   Typography,
 } from "@mui/material";
 import HighchartsReact from "highcharts-react-official";
@@ -75,12 +78,26 @@ const options = (data: ChartDataType[]): Options => ({
   ],
 });
 
-const rangeMenuStyles = {
+const rangeOptions = [
+  { caption: "近 3 年", value: "3" },
+  { caption: "近 5 年", value: "5" },
+  { caption: "近 8 年", value: "8" },
+  { caption: "自訂", value: "custom" },
+];
+
+const rangeMenuStylesOpen = {
+  width: "86px",
+  backgroundColor: "#F3F3F3",
+  color: "#000",
+};
+
+const rangeMenuStylesClose = {
+  width: "86px",
   backgroundColor: "#0386F4",
   color: "#FFF",
   "& .MuiSelect-icon": {
-    color: "#FFF"
-  }
+    color: "#FFF",
+  },
 };
 
 const selectStyles = {
@@ -105,35 +122,41 @@ const rangeLabelStyles = { fontSize: "13px", fontWeight: "700" };
 export default function Chart() {
   const { chartData, params, setParams } = useContext(DataContext);
   const { data } = chartData;
-  const [range, setRange] = useState<"3" | "5" | "8" | "custom">("5");
+  const [currentSelect, setCurrentSelect] = useState<number>(1);
   const [rangeMenuOpen, setRangeMenuOpen] = useState<boolean>(false);
-  const [customRange, setCustomRange] = useState<{startYear: string; endYear: string;}>({
+  const [customRange, setCustomRange] = useState<{
+    startYear: string;
+    endYear: string;
+  }>({
     startYear: params.startYear,
     endYear: params.endYear,
   });
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const currentYear = new Date().getFullYear();
 
-  const handleChange = (e: SelectChangeEvent) => {
-    const value = e.target.value;
-    switch (value) {
-      case "3":
-      case "5":
-      case "8":
-        setParams((prev) => ({
-          ...prev,
-          startYear: (currentYear - parseInt(value, 10)).toString(),
-          endYear: currentYear.toString(),
-        }));
-        break;
-      case "custom":
-        setRangeMenuOpen(true);
-        break;
-      default:
-        throw new Error("Data period out of range");
-    }
-    setRange(value as "3" | "5" | "8" | "custom");
-  };
+  const handleRangeClick =
+    (i: number) => (e: React.MouseEvent<HTMLButtonElement>) => {
+      const value = e.currentTarget.value;
+      switch (value) {
+        case "3":
+        case "5":
+        case "8":
+          setParams((prev) => ({
+            ...prev,
+            startYear: (currentYear - parseInt(value, 10)).toString(),
+            endYear: currentYear.toString(),
+          }));
+          break;
+        case "custom":
+          setAnchorEl(null)
+          setRangeMenuOpen(true);
+          break;
+        default:
+          throw new Error("Data period out of range");
+      }
+      setCurrentSelect(i);
+    };
 
   const handleCutom =
     (startOrEnd: "startYear" | "endYear") => (e: SelectChangeEvent) => {
@@ -153,6 +176,10 @@ export default function Chart() {
     setRangeMenuOpen(false);
   };
 
+  const open = !!anchorEl;
+
+  // console.log("options(data as ChartDataType[]): ", options(data as ChartDataType[]));
+
   return (
     <Box
       sx={{
@@ -165,22 +192,48 @@ export default function Chart() {
     >
       <Stack direction="row" justifyContent="space-between">
         <Button variant="contained">每月營收</Button>
-        {!rangeMenuOpen ? (
-          <Select
-            size="small"
-            IconComponent={KeyboardArrowDownIcon}
-            value={range}
-            onChange={handleChange}
-            sx={rangeMenuStyles}
+
+        <>
+          <Button
+            endIcon={<KeyboardArrowDownIcon />}
+            sx={open ? rangeMenuStylesOpen : rangeMenuStylesClose}
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+              setAnchorEl(e.currentTarget)
+            }
           >
-            <MenuItem value="3">近 3 年</MenuItem>
-            <MenuItem value="5">近 5 年</MenuItem>
-            <MenuItem value="8">近 8 年</MenuItem>
-            <MenuItem value="custom">自訂</MenuItem>
-          </Select>
-        ) : (
-          <></>
-        )}
+            {rangeOptions[currentSelect].caption}
+          </Button>
+          <Popover
+            anchorEl={anchorEl}
+            open={open}
+            onClose={() => setAnchorEl(null)}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "left",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "left",
+            }}
+            sx={{
+              "& .MuiPopover-paper": {
+                borderRadius: 0,
+              },
+            }}
+          >
+            <Stack sx={{ borderRadius: 0 }}>
+              {rangeOptions.map((obj, idx) => (
+                <RangeMenuButton
+                  key={idx}
+                  value={obj.value}
+                  onClick={handleRangeClick(idx)}
+                >
+                  {obj.caption}
+                </RangeMenuButton>
+              ))}
+            </Stack>
+          </Popover>
+        </>
         {rangeMenuOpen ? (
           <Box
             sx={{
@@ -259,3 +312,14 @@ export default function Chart() {
     </Box>
   );
 }
+
+const RangeMenuButton = styled(Button)<ButtonProps>({
+  backgroundColor: "#434343",
+  color: "#FFF",
+  borderRadius: 0,
+  padding: "9px 12px",
+  width: "80px",
+  "&:hover": {
+    backgroundColor: "#838383",
+  },
+});

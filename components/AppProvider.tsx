@@ -58,7 +58,10 @@ const theme = createTheme({
     },
     MuiButton: {
       styleOverrides: {
-        root: { backgroundColor: "#0386F4" },
+        root: { 
+          backgroundColor: "#0386F4",
+          borderRadius: "3px"
+        },
       },
     },
   },
@@ -112,22 +115,27 @@ function DataProvider({ children }: { children: React.ReactNode }) {
     );
   });
   const fetchData = (dataset: string) => async () => {
+
+    console.log("fetching: ", dataset);
+
     const response = await fetch(
       `/api?dataset=${dataset}&data_id=${params.stockID}&start_date=${String(parseInt(params.startYear, 10) - 1)}-02-01&end_date=${String(parseInt(params.endYear, 10) + 1)}-01-01`
     );
 
-    //
     if (!response.ok) throw new Error("Failed to fetch data");
+    
+    const data = await response.json();
+    console.log("data: ", JSON.stringify(data));
 
-    return response.json();
+    return data;
   };
 
-  const { data: stockList = { msg: "", status: "", data: [] } } =
-    useQuery<ResponseType>({
-      queryKey: ["list"],
-      queryFn: fetchData("TaiwanStockInfo"),
-      enabled: true,
-    });
+  // const { data: stockList = { msg: "", status: "", data: [] } } =
+  //   useQuery<ResponseType>({
+  //     queryKey: ["list"],
+  //     queryFn: fetchData("TaiwanStockInfo"),
+  //     enabled: true,
+  //   });
 
   const { data: chartData = { msg: "", status: "", data: [] } } =
     useQuery<ResponseType>({
@@ -136,12 +144,12 @@ function DataProvider({ children }: { children: React.ReactNode }) {
       enabled: !!params.startYear && !!params.endYear,
     });
 
-  // console.log("data: ", JSON.stringify(chartData));
+  console.log("chartData: ", JSON.stringify(chartData));
 
   return (
     <DataContext.Provider
       value={{
-        stockList: stockList,
+        stockList: { msg: "", status: "", data: [] },
         chartData: chartData,
         params: params,
         setParams: setParams,
