@@ -12,7 +12,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { useContext } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { ChartDataType, DataContext } from "./AppProvider";
 import { numberFormat } from "highcharts";
 import { calcYoY } from "@/lib/util";
@@ -27,23 +27,56 @@ const tableCellStyles = {
 export default function DataTable() {
   const { chartData } = useContext(DataContext);
   const { data } = chartData;
-  console.log("Table data: ", chartData);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (el) {
+        el.scrollLeft = el.scrollWidth;
+    }
+  }, [data])
+
   return (
-    <Box sx={{ width: "717px", height: "310px", backgroundColor: "#FFFFFF", marginBottom: "20px" }}>
+    <Box
+      sx={{
+        width: "717px",
+        height: "260px",
+        backgroundColor: "#FFFFFF",
+        marginBottom: "20px",
+      }}
+    >
       <Stack direction="row" sx={{ padding: "15px 18px" }}>
         <Button variant="contained">詳細數據</Button>
       </Stack>
-      <TableContainer>
+      <TableContainer ref={containerRef}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell sx={{...tableCellStyles, backgroundColor: "#F6F8FA"}}>
+              <TableCell
+                sx={{
+                  ...tableCellStyles,
+                  backgroundColor: "#F6F8FA",
+                  position: "sticky",
+                  left: 0,
+                  zIndex: 2
+                }}
+              >
                 <Typography>年度月份</Typography>
               </TableCell>
+              <TableCell
+                sx={{
+                  width: "5px",
+                  minWidth: "5px",
+                  maxWidth: "5px",
+                  padding: 0,
+                  backgroundColor: "#FFF",
+                  borderBottom: "none"
+                }}
+              />
               {(data as ChartDataType[]).slice(12).map((obj, idx) => (
                 <TableCell
                   key={`date-${idx}`}
-                  sx={{...tableCellStyles, backgroundColor: "#F6F8FA"}}
+                  sx={{ ...tableCellStyles, backgroundColor: "#F6F8FA" }}
                   align="right"
                 >{`${obj.revenue_year.toString()}${obj.revenue_month
                   .toString()
@@ -53,9 +86,27 @@ export default function DataTable() {
           </TableHead>
           <TableBody>
             <TableRow>
-              <TableCell sx={tableCellStyles}>
+              <TableCell
+                sx={{
+                  ...tableCellStyles,
+                  position: "sticky",
+                  left: 0,
+                  backgroundColor: "#FFF",
+                  zIndex: 2
+                }}
+              >
                 <Typography>每月營收</Typography>
               </TableCell>
+              <TableCell
+                sx={{
+                  width: "5px",
+                  minWidth: "5px",
+                  maxWidth: "5px",
+                  padding: 0,
+                  backgroundColor: "#FFF",
+                  borderBottom: "none"
+                }}
+              />
               {(data as ChartDataType[]).slice(12).map((obj, idx) => (
                 <TableCell
                   key={`rev-${idx}`}
@@ -67,14 +118,32 @@ export default function DataTable() {
               ))}
             </TableRow>
             <TableRow>
-              <TableCell sx={{...tableCellStyles, backgroundColor: "#F6F8FA"}}>
+              <TableCell
+                sx={{
+                  ...tableCellStyles,
+                  backgroundColor: "#F6F8FA",
+                  position: "sticky",
+                  left: 0,
+                  zIndex: 2
+                }}
+              >
                 <Typography>單月營收年增率(%)</Typography>
               </TableCell>
+              <TableCell
+                sx={{
+                  width: "5px",
+                  minWidth: "5px",
+                  maxWidth: "5px",
+                  padding: 0,
+                  backgroundColor: "#FFF",
+                  borderBottom: "none"
+                }}
+              />
               {calcYoY((data as ChartDataType[]).map((obj) => obj.revenue)).map(
                 (yoy, idx) => (
                   <TableCell
                     key={`yoy-${idx}`}
-                    sx={{...tableCellStyles, backgroundColor: "#F6F8FA"}}
+                    sx={{ ...tableCellStyles, backgroundColor: "#F6F8FA" }}
                     align="right"
                   >
                     {numberFormat(yoy, 2, ".", ",")}
