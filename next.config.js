@@ -4,7 +4,7 @@ module.exports = {
       {
         source: "/api",
         destination:
-          "https://api.finmindtrade.com/api/v4/data", // 目標 API URL
+          "https://api.finmindtrade.com/api/v4/data",
       },
     ];
   },

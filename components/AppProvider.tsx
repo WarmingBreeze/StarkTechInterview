@@ -1,6 +1,11 @@
 "use client";
 
-import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
+import {
+  CircularProgress,
+  createTheme,
+  CssBaseline,
+  ThemeProvider,
+} from "@mui/material";
 import {
   QueryClient,
   QueryClientProvider,
@@ -58,9 +63,9 @@ const theme = createTheme({
     },
     MuiButton: {
       styleOverrides: {
-        root: { 
+        root: {
           backgroundColor: "#0386F4",
-          borderRadius: "3px"
+          borderRadius: "3px",
         },
       },
     },
@@ -81,7 +86,7 @@ export const DataContext = createContext<DataContextType>({
   params: {
     stockID: "",
     startYear: "",
-    endYear: ""
+    endYear: "",
   },
   setParams: () => {},
 });
@@ -106,28 +111,28 @@ export default function AppProvider({
 function DataProvider({ children }: { children: React.ReactNode }) {
   const [params, setParams] = useState<ParamsType>(() => {
     const currentYear = new Date().getFullYear();
-    return (
-      {
-        stockID: "2330",
-        startYear: (currentYear - 5).toString(),
-        endYear: currentYear.toString(),
-      }
-    );
+    return {
+      stockID: "2330",
+      startYear: (currentYear - 5).toString(),
+      endYear: currentYear.toString(),
+    };
   });
-  const fetchData = (dataset: string) => async () => {
-
-    console.log("fetching: ", dataset);
-
+  const fetchData = async () => {
     const response = await fetch(
-      `/api?dataset=${dataset}&data_id=${params.stockID}&start_date=${String(parseInt(params.startYear, 10) - 1)}-02-01&end_date=${String(parseInt(params.endYear, 10) + 1)}-01-01`
+      `/api?dataset=TaiwanStockMonthRevenue&data_id=${
+        params.stockID
+      }&start_date=${String(
+        parseInt(params.startYear, 10) - 1
+      )}-02-01&end_date=${String(parseInt(params.endYear, 10) + 1)}-01-01`,
+      // {
+      //   headers: {
+      //     Authorization:
+      //       "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoiMjAyNS0wNy0yNiAwOToyNDo0NyIsInVzZXJfaWQiOiJTaGF3bkgiLCJpcCI6IjEwMy41OS4xMDguMTAwIiwiZXhwIjoxNzU0MDk3ODg3fQ.lzfDB-x49uLYkzrGYULjlyjEIfiMVueVFhYwR0swKxU",
+      //   },
+      // }
     );
 
-    if (!response.ok) throw new Error("Failed to fetch data");
-    
-    const data = await response.json();
-    console.log("data: ", JSON.stringify(data));
-
-    return data;
+    return response.json();
   };
 
   // const { data: stockList = { msg: "", status: "", data: [] } } =
@@ -137,14 +142,24 @@ function DataProvider({ children }: { children: React.ReactNode }) {
   //     enabled: true,
   //   });
 
-  const { data: chartData = { msg: "", status: "", data: [] } } =
-    useQuery<ResponseType>({
-      queryKey: ["data", params.startYear, params.endYear],
-      queryFn: fetchData("TaiwanStockMonthRevenue"),
-      enabled: !!params.startYear && !!params.endYear,
-    });
+  const {
+    data: chartData = { msg: "", status: "", data: [] },
+    isLoading,
+    isError,
+    error,
+  } = useQuery<ResponseType>({
+    queryKey: ["data", params.stockID, params.startYear, params.endYear],
+    queryFn: fetchData,
+    enabled: !!params.startYear && !!params.endYear && !!params.stockID,
+  });
 
-  console.log("chartData: ", JSON.stringify(chartData));
+  if (isLoading) return <CircularProgress />;
+  // if (isError) {
+  //   console.error("Query error:", error);
+  // }
+
+  // console.log("stockList: ", JSON.stringify(stockList));
+  // console.log("chartData: ", JSON.stringify(chartData));
 
   return (
     <DataContext.Provider

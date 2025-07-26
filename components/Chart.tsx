@@ -147,6 +147,7 @@ export default function Chart() {
             startYear: (currentYear - parseInt(value, 10)).toString(),
             endYear: currentYear.toString(),
           }));
+          setAnchorEl(null)
           break;
         case "custom":
           setAnchorEl(null)

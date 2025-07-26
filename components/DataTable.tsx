@@ -32,9 +32,9 @@ export default function DataTable() {
   useEffect(() => {
     const el = containerRef.current;
     if (el) {
-        el.scrollLeft = el.scrollWidth;
+      el.scrollLeft = el.scrollWidth;
     }
-  }, [data])
+  }, [data]);
 
   return (
     <Box
@@ -58,27 +58,32 @@ export default function DataTable() {
                   backgroundColor: "#F6F8FA",
                   position: "sticky",
                   left: 0,
-                  zIndex: 2
+                  zIndex: 2,
+                  "&::after": {
+                    content: '""',
+                    display: "block",
+                    position: "absolute",
+                    borderTop: "none",
+                    borderBottom: "none",
+                    borderLeft: "1px solid #e3e3e3",
+                    borderRight: "none",
+                    top: 0,
+                    right: 0, // half the gap, to balance visually
+                    width: "5px",
+                    height: "100%",
+                    backgroundColor: "#fff", // same as table background
+                    zIndex: 1,
+                  },
                 }}
               >
-                <Typography>年度月份</Typography>
+                <Typography>年度/月份</Typography>
               </TableCell>
-              <TableCell
-                sx={{
-                  width: "5px",
-                  minWidth: "5px",
-                  maxWidth: "5px",
-                  padding: 0,
-                  backgroundColor: "#FFF",
-                  borderBottom: "none"
-                }}
-              />
               {(data as ChartDataType[]).slice(12).map((obj, idx) => (
                 <TableCell
                   key={`date-${idx}`}
                   sx={{ ...tableCellStyles, backgroundColor: "#F6F8FA" }}
                   align="right"
-                >{`${obj.revenue_year.toString()}${obj.revenue_month
+                >{`${obj.revenue_year.toString()}/${obj.revenue_month
                   .toString()
                   .padStart(2, "0")}`}</TableCell>
               ))}
@@ -92,21 +97,26 @@ export default function DataTable() {
                   position: "sticky",
                   left: 0,
                   backgroundColor: "#FFF",
-                  zIndex: 2
+                  zIndex: 2,
+                  "&::after": {
+                    content: '""',
+                    display: "block",
+                    position: "absolute",
+                    borderTop: "none",
+                    borderBottom: "none",
+                    borderLeft: "1px solid #e3e3e3",
+                    borderRight: "none",
+                    top: 0,
+                    right: 0, // half the gap, to balance visually
+                    width: "5px",
+                    height: "100%",
+                    backgroundColor: "#fff", // same as table background
+                    zIndex: 1,
+                  },
                 }}
               >
                 <Typography>每月營收</Typography>
               </TableCell>
-              <TableCell
-                sx={{
-                  width: "5px",
-                  minWidth: "5px",
-                  maxWidth: "5px",
-                  padding: 0,
-                  backgroundColor: "#FFF",
-                  borderBottom: "none"
-                }}
-              />
               {(data as ChartDataType[]).slice(12).map((obj, idx) => (
                 <TableCell
                   key={`rev-${idx}`}
@@ -124,21 +134,26 @@ export default function DataTable() {
                   backgroundColor: "#F6F8FA",
                   position: "sticky",
                   left: 0,
-                  zIndex: 2
+                  zIndex: 2,
+                  "&::after": {
+                    content: '""',
+                    display: "block",
+                    position: "absolute",
+                    borderTop: "none",
+                    borderBottom: "none",
+                    borderLeft: "1px solid #e3e3e3",
+                    borderRight: "none",
+                    top: 0,
+                    right: 0, // half the gap, to balance visually
+                    width: "5px",
+                    height: "100%",
+                    backgroundColor: "#fff", // same as table background
+                    zIndex: 1,
+                  },
                 }}
               >
                 <Typography>單月營收年增率(%)</Typography>
               </TableCell>
-              <TableCell
-                sx={{
-                  width: "5px",
-                  minWidth: "5px",
-                  maxWidth: "5px",
-                  padding: 0,
-                  backgroundColor: "#FFF",
-                  borderBottom: "none"
-                }}
-              />
               {calcYoY((data as ChartDataType[]).map((obj) => obj.revenue)).map(
                 (yoy, idx) => (
                   <TableCell
