@@ -44,6 +44,7 @@ interface ResponseType {
 
 interface DataContextType {
   stockList: ResponseType;
+  header: ResponseType;
   chartData: ResponseType;
   params: ParamsType;
   setParams: React.Dispatch<SetStateAction<ParamsType>>;
@@ -74,6 +75,11 @@ const theme = createTheme({
 
 export const DataContext = createContext<DataContextType>({
   stockList: {
+    msg: "",
+    status: "",
+    data: [],
+  },
+  header: {
     msg: "",
     status: "",
     data: [],
@@ -117,54 +123,55 @@ function DataProvider({ children }: { children: React.ReactNode }) {
       endYear: currentYear.toString(),
     };
   });
-  const fetchData = async () => {
-    const response = await fetch(
-      `/api?dataset=TaiwanStockMonthRevenue&data_id=${
-        params.stockID
-      }&start_date=${String(
-        parseInt(params.startYear, 10) - 1
-      )}-02-01&end_date=${String(parseInt(params.endYear, 10) + 1)}-01-01`,
-      // {
-      //   headers: {
-      //     Authorization:
-      //       "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoiMjAyNS0wNy0yNiAwOToyNDo0NyIsInVzZXJfaWQiOiJTaGF3bkgiLCJpcCI6IjEwMy41OS4xMDguMTAwIiwiZXhwIjoxNzU0MDk3ODg3fQ.lzfDB-x49uLYkzrGYULjlyjEIfiMVueVFhYwR0swKxU",
-      //   },
-      // }
-    );
+  const fetchData =
+    (targetComponent: "searchbar" | "header" | "chart") => async () => {
+      let queryString: string;
+      switch (targetComponent) {
+        case "searchbar":
+          queryString = "target=searchbar";
+          break;
+        case "header":
+          queryString = `target=header&data_id=${params.stockID}`;
+          break;
+        case "chart":
+          queryString = `target=chart&data_id=${
+            params.stockID
+          }&start_date=${String(
+            parseInt(params.startYear, 10) - 1
+          )}-02-01&end_date=${String(parseInt(params.endYear, 10) + 1)}-01-01`;
+          break;
+      }
+      const response = await fetch(`/api/data?${queryString}`);
 
-    return response.json();
-  };
+      return response.json();
+    };
 
-  // const { data: stockList = { msg: "", status: "", data: [] } } =
-  //   useQuery<ResponseType>({
-  //     queryKey: ["list"],
-  //     queryFn: fetchData("TaiwanStockInfo"),
-  //     enabled: true,
-  //   });
+  const { data: stockList = { msg: "", status: "", data: [] } } =
+    useQuery<ResponseType>({
+      queryKey: ["searchbar"],
+      queryFn: fetchData("searchbar"),
+      enabled: true,
+    });
 
-  const {
-    data: chartData = { msg: "", status: "", data: [] },
-    isLoading,
-    isError,
-    error,
-  } = useQuery<ResponseType>({
-    queryKey: ["data", params.stockID, params.startYear, params.endYear],
-    queryFn: fetchData,
-    enabled: !!params.startYear && !!params.endYear && !!params.stockID,
-  });
+  const { data: header = { msg: "", status: "", data: [] } } =
+    useQuery<ResponseType>({
+      queryKey: ["header", params.stockID],
+      queryFn: fetchData("header"),
+      enabled: !!params.stockID,
+    });
 
-  if (isLoading) return <CircularProgress />;
-  // if (isError) {
-  //   console.error("Query error:", error);
-  // }
-
-  // console.log("stockList: ", JSON.stringify(stockList));
-  // console.log("chartData: ", JSON.stringify(chartData));
+  const { data: chartData = { msg: "", status: "", data: [] } } =
+    useQuery<ResponseType>({
+      queryKey: ["data", params.stockID, params.startYear, params.endYear],
+      queryFn: fetchData("chart"),
+      enabled: !!params.startYear && !!params.endYear && !!params.stockID,
+    });
 
   return (
     <DataContext.Provider
       value={{
-        stockList: { msg: "", status: "", data: [] },
+        stockList: stockList,
+        header: header,
         chartData: chartData,
         params: params,
         setParams: setParams,
