@@ -25,7 +25,7 @@ export default function Header() {
         borderRadius: "4px",
       }}
     >
-      <Typography>{caption}</Typography>
+      <Typography sx={{fontSize: "18px", color: "#434343", fontWeight: 700}}>{caption}</Typography>
     </Box>
   );
 }

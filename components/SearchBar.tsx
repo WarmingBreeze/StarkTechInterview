@@ -39,9 +39,7 @@ export default function SearchBar() {
   function handleKeydown(e: React.KeyboardEvent<HTMLInputElement>) {
     const key = e.key;
     if (key === "Enter") handleSearch(inputValue);
-    if (key === "Escape") {
-      resetSearch();
-    }
+    if (key === "Escape") resetSearch();
   }
 
   function handleSearch(value: string) {
@@ -54,6 +52,7 @@ export default function SearchBar() {
   }
 
   const handleClick = (value: string) => () => {
+    console.log("value: ", value);
     setParams((prev) => {
       return {
         ...prev,
@@ -61,10 +60,6 @@ export default function SearchBar() {
       };
     });
   };
-
-  function handleBlur () {
-    resetSearch();
-  }
 
   function resetSearch() {
     setInputValue("");
@@ -93,7 +88,6 @@ export default function SearchBar() {
             value={inputValue}
             onChange={handleChange}
             onKeyDown={handleKeydown}
-            onBlur={handleBlur}
             id="stock-name-or-ticker"
             endAdornment={
               <InputAdornment position="end">
@@ -133,7 +127,7 @@ export default function SearchBar() {
             <List>
               {searchResults.map((str, idx) => (
                 <ListItem key={idx} disablePadding disableGutters>
-                  <ListItemButton onClick={handleClick(str.split("-")[0])}>
+                  <ListItemButton onClick={handleClick(str.split(" ")[0])}>
                     <ListItemText
                       primary={<>
                         {str.split(inputValue)[0] && <span style={{fontWeight: 700, fontSize: "15px"}}>{str.split(inputValue)[0]}</span>}
