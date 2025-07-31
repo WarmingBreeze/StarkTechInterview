@@ -122,6 +122,7 @@ const rangeLabelStyles = { fontSize: "13px", fontWeight: "700" };
 export default function Chart() {
   const { chartData, params, setParams } = useContext(DataContext);
   const { data } = chartData;
+  console.log("data:", JSON.stringify(data));
   const [currentSelect, setCurrentSelect] = useState<number>(1);
   const [rangeMenuOpen, setRangeMenuOpen] = useState<boolean>(false);
   const [customRange, setCustomRange] = useState<{
@@ -305,11 +306,12 @@ export default function Chart() {
         )}
       </Stack>
       <Box sx={{ zIndex: 1 }}>
-        <HighchartsReact
+        {data.length > 0 && <HighchartsReact
           highcharts={Highcharts}
           options={options(data as ChartDataType[])}
-        />
+        />}
       </Box>
+      {data.length === 0 && <Typography sx={{position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)"}}>無資料</Typography>}
     </Box>
   );
 }
